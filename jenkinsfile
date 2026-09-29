@@ -15,7 +15,7 @@ pipeline {
         }
         stage ("Git Checkout") {
             steps {
-                git 'https://github.com/KastroVKiran/Zomato-Project-Kastro.git'
+                git 'https://github.com/faizan015516/DevOps-Project-Zomato-Kastro.git'
             }
         }
         stage("Sonarqube Analysis"){
@@ -38,10 +38,16 @@ pipeline {
                 sh "npm install"
             }
         }
-        stage('OWASP FS SCAN') {
-            steps {
-                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit -n', odcInstallation: 'DP-Check'
-                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+    stage('OWASP FS SCAN') {
+    steps {
+        dependencyCheck(
+            additionalArguments: '--nvdDatafeed https://dependency-check.github.io/DependencyCheck_Builder/nvd_cache/nvdcve-{0}.json.gz',
+            odcInstallation: 'DP-Check'
+        )
+
+        dependencyCheckPublisher(
+            pattern: '**/dependency-check-report.xml'
+        )
     }
 }
         stage ("Trivy File Scan") {
@@ -58,8 +64,8 @@ pipeline {
             steps {
                 script {
                     withDockerRegistry(credentialsId: 'docker') {
-                        sh "docker tag zomato kastrov/zomato:latest "
-                        sh "docker push kastrov/zomato:latest "
+                        sh "docker tag zomato faizann1212121/zomato:latest "
+                        sh "docker push faizann1212121/zomato:latest "
                     }
                 }
             }
@@ -68,16 +74,16 @@ pipeline {
             steps {
                 script{
                    withDockerRegistry(credentialsId: 'docker', toolName: 'docker'){
-                       sh 'docker-scout quickview kastrov/zomato:latest'
-                       sh 'docker-scout cves kastrov/zomato:latest'
-                       sh 'docker-scout recommendations kastrov/zomato:latest'
+                       sh 'docker-scout quickview faizann1212121/zomato:latest'
+                       sh 'docker-scout cves faizann1212121/zomato:latest'
+                       sh 'docker-scout recommendations faizann1212121/zomato:latest'
                    }
                 }
             }
         }
         stage ("Deploy to Container") {
             steps {
-                sh 'docker run -d --name zomato -p 3000:3000 kastrov/zomato:latest'
+                sh 'docker run -d --name zomato -p 3000:3000 faizann1212121/zomato:latest'
             }
         }
     }
@@ -100,7 +106,7 @@ pipeline {
                 </body>
                 </html>
             """,
-            to: 'kastrokiran@gmail.com',
+            to: 'faizann447@gmail.com',
             mimeType: 'text/html',
             attachmentsPattern: 'trivy.txt'
         }
